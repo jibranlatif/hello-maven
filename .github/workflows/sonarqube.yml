@@ -1,0 +1,36 @@
+name: SonarQube Scan
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK (if needed)
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Cache SonarQube scanner
+        uses: actions/cache@v2
+        with:
+          path: ~/.sonar
+          key: ${{ runner.os }}-sonar-${{ hashFiles('**/*.java') }}
+          restore-keys: |
+            ${{ runner.os }}-sonar-
+
+      - name: Run SonarQube analysis
+        uses: sonarsource/sonarcloud-github-action@v1
+        with:
+          sonar-token: ${{ secrets.sqp_94dd08ea564e2f0bc9809b65e14d93640c548b1c }}
+          projectKey: my_project_key # Replace with your SonarQube project key
+          organization: my_organization # Replace with your organization name
+
+      - name: Run SonarQube analysis for Gradle (if using Gradle)
+        run: ./gradlew sonarqube -Dsonar.projectKey=my_project_key -Dsonar.host.url=https://sonarqube.com -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
